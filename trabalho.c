@@ -88,15 +88,15 @@ void escrevePontos(estado *e){
     int menor = menorPontuacao(e);
     if(e->pontos > e->melhoresPontos[menor]){
     arquivo = fopen("pontuacao.txt", "w");
-      if(arquivo == NULL){
-          printf("não foi possivel salvar sua pontuação\n");
-          return;
-      }
-
-      fprintf(arquivo, "%d %d %d", e->melhoresPontos[0], e->melhoresPontos[1], e->melhoresPontos[2]);
-      fclose(arquivo);
-      printf(" novo recorde!");
+    if(arquivo == NULL){
+      printf("não foi possivel salvar sua pontuação\n");
+      return;
     }
+    e->melhoresPontos[menor] = e->pontos;
+    fprintf(arquivo, "%d %d %d", e->melhoresPontos[0], e->melhoresPontos[1], e->melhoresPontos[2]);
+    fclose(arquivo);
+    printf(" novo recorde!");
+  }
 }
 
 void sons(estado *e){
