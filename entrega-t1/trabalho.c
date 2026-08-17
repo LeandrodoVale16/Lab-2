@@ -176,8 +176,7 @@ void tela(estado *e){
     printf("%d %d %c", e->pontos, e->municao, e->arma);
     printf("%s", e->P);
   } else {
-    printf("N%d %d %c", e->pontos, e->municao, e->arma);
-    printf("%s", e->PN);
+    printf("MODO NOTURNO");
   }
 }
 
