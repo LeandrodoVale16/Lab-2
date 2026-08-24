@@ -16,7 +16,7 @@ typedef struct{
   char arma;
   char P[14];
   char PN[9];
-  bool vivo, mostrou, continuar, decidiu, salvo, diurno;
+  bool vivo, mostrou, continuar, decidiu, salvo, diurno, fim;
 }estado;
 
 void crono_inicia(crono *c){
@@ -99,6 +99,7 @@ void inicializaEstado(estado *e){
   e->diurno = true;
   e->vivo = true;
   e->continuar = true;
+  e->fim = false;
   e->salvo = false;
   e->decidiu = false;
   e->mostrou = false;
@@ -173,7 +174,7 @@ char resumo(estado *e){
 //aparece todas as informaçoes do jogo
 void tela(estado *e){
   if (e->diurno == true){
-    printf("%d %d %c", e->pontos, e->municao, e->arma);
+    printf("%d %.2d %c", e->pontos, e->municao, e->arma);
     printf("%s", e->P);
   } else {
     printf("MODO NOTURNO");
@@ -537,7 +538,6 @@ void continuar(estado *e){
   e->salvo = false;
   verificaPontos(e);
   escrevePontos(e);
-  putchar('\n');
   while (e->decidiu == false){
     telaEscolha(e);
     char tecla = lechar();
@@ -548,8 +548,19 @@ void continuar(estado *e){
     } else if (tecla == 'N' || tecla == 'n'){
       e->continuar = false;
       e->decidiu = true;
+      printf("\n");
     } 
     putchar('\r');    
+  }
+}
+
+//resumo do fim do jogo
+void fimDeJogo(estado *e){
+  if (e->continuar == false){
+    printf("FIM DE JOGO!\n");
+    printf("Você fez %d pontos\n", e->pontos);
+    printf("PLACAR: %d %d %d\n", e->topRank[0], e->topRank[1], e->topRank[2]);
+    e->fim = true;
   }
 }
 
@@ -561,6 +572,7 @@ void jogo(estado *e) {
   if (e->continuar == true){
     continuar(e);
   }
+  fimDeJogo(e);
 }    
 
 //inicia coisas necessarias para o funcionamento do jogo
@@ -574,7 +586,7 @@ int main(){
   arrumaGame();
   estado e;
   inicializaEstado(&e);
-  while (e.continuar == true){
+  while (e.fim == false){
     jogo(&e);
   }
   system("stty sane");
