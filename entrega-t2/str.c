@@ -9,10 +9,11 @@
 
 #define MIN_ALLOC 8    // alocação mínima
 
-struct str {
+typedef struct str {
   char *string;
-  int tamanho;
-};
+  int tamanhoCaracteres;
+  int bytesAlocado;
+}*Str;
 
 // A memória para conter os bytes de uma string deve ser alocada e/ou
 //   realocada conforme a necessidade, cuidando para que a quantidade
@@ -26,8 +27,36 @@ struct str {
 
 // funções auxiliares {{{1
 
-void bytes(){
-  
+static void tamanhoAlocado(Str l){
+  l->bytesAlocado = sizeof(l->string);
+}
+
+static void valorCaractere(Str l){
+  int i = 0;
+  while(l->string[i] != '\0'){
+    i++;
+  }
+  l->tamanhoCaracteres = i;
+}
+
+static void converteTexto(char const *strC, Str s)
+{
+  int i = 0;
+  int bytes = 0;
+  int capacidade = 8;
+  char *stringTeste = malloc(sizeof(char));
+  char *stringTemporaria;
+  strcpy(stringTeste, strC);
+  while (stringTeste[i] != '\0'){
+    stringTemporaria[i] = u8_converte_pra_utf8(i, strC);
+    bytes = bytes + u8_conta_unichar_nos_bytes(i, strC[i]);
+    i++;
+  }
+  while(bytes > capacidade){
+    capacidade * 2;
+  }
+  s->string = malloc(capacidade);
+  strcpy(s->string ,stringTemporaria);
 }
 
 // verifica se a string cad está de acordo com a especificação
@@ -35,6 +64,7 @@ void bytes(){
 static void s_ok(Str_c s)
 {
   assert(s != NULL);
+
 }
 
 //...
@@ -45,14 +75,13 @@ Str s_cria(char const *strC)
 {
   Str s = malloc(sizeof(*s));
   assert(s != NULL);
-  s->string = ("%s", strC);
+  converteTexto(strC, s);
   return s;
 }
 
 void s_destroi(Str s)
 {
   s_ok(s);
-  //...
   free(s);
 }
 
@@ -82,7 +111,11 @@ Str s_cria_de_arquivo(char *nome)
 int s_tam(Str_c s)
 {
   s_ok(s);
-  //...
+  int x = strlen(s);
+  if (x > 0){
+    return x;
+  }
+  
   return 0;
 }
 
@@ -107,7 +140,6 @@ bool s_igual(Str_c s, Str_c sb)
 {
   s_ok(s);
   s_ok(sb);
-  return false;
 }
 
 int s_busca_c(Str_c s, int pos, Str_c sb)
@@ -157,7 +189,7 @@ void s_substitui(Str s, int pos, int tam, Str_c sb)
 {
   s_ok(s);
   s_ok(sb);
-  //...
+  
 }
 
 void s_substring(Str s, Str_c sb, int pos, int tam)
