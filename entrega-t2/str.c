@@ -12,7 +12,7 @@
 typedef struct str {
   char *string;
   int tamanhoCaracteres;
-  int bytesAlocado;
+  int bytesAlocados;
 }*Str;
 
 // A memória para conter os bytes de uma string deve ser alocada e/ou
@@ -27,36 +27,26 @@ typedef struct str {
 
 // funções auxiliares {{{1
 
+static int tamanhoBytesStrC(char const *s){
+  return strlen(s);
+}
+
 static void tamanhoAlocado(Str l){
-  l->bytesAlocado = sizeof(l->string);
+  l->bytesAlocados = strlen(l->string);
 }
 
-static void valorCaractere(Str l){
-  int i = 0;
-  while(l->string[i] != '\0'){
-    i++;
-  }
-  l->tamanhoCaracteres = i;
+static void quantidadeCaracteres(Str l){
+  l->tamanhoCaracteres = strlen(l->string);
 }
 
-static void converteTexto(char const *strC, Str s)
-{
-  int i = 0;
-  int bytes = 0;
-  int capacidade = 8;
-  char *stringTeste = malloc(sizeof(char));
-  char *stringTemporaria;
-  strcpy(stringTeste, strC);
-  while (stringTeste[i] != '\0'){
-    stringTemporaria[i] = u8_converte_pra_utf8(i, strC);
-    bytes = bytes + u8_conta_unichar_nos_bytes(i, strC[i]);
-    i++;
+static void arrumaPos(int *pos, byte *texto){
+  if (pos < 0){
+    int tamTex = strlen(texto);
+    int x = u8_conta_unichar_nos_bytes(tamTex, texto);
+    if(x != -1){
+      pos = pos + (x+1); //pos+tam+1 inverte a pos
+    }
   }
-  while(bytes > capacidade){
-    capacidade * 2;
-  }
-  s->string = malloc(capacidade);
-  strcpy(s->string ,stringTemporaria);
 }
 
 // verifica se a string cad está de acordo com a especificação
@@ -64,6 +54,7 @@ static void converteTexto(char const *strC, Str s)
 static void s_ok(Str_c s)
 {
   assert(s != NULL);
+  assert(s->bytesAlocados >= s->tamanhoCaracteres);
 
 }
 
@@ -75,13 +66,37 @@ Str s_cria(char const *strC)
 {
   Str s = malloc(sizeof(*s));
   assert(s != NULL);
-  converteTexto(strC, s);
+  int bytesPontenciaDeDois = MIN_ALLOC;
+  int x = tamanhoBytesStrC(strC);
+  byte *copia;
+  copia = malloc(x);
+  strcpy(copia, strC);
+  int verifica = u8_conta_unichar_nos_bytes(x, copia);
+  if (verifica > -1){
+    //da pra fazer em um while
+    for(int i = 0; bytesPontenciaDeDois < x; i++){
+      bytesPontenciaDeDois = bytesPontenciaDeDois * 2;
+    }
+    if (bytesPontenciaDeDois >= x && bytesPontenciaDeDois <= 3 * bytesPontenciaDeDois){
+      s->string = malloc(bytesPontenciaDeDois);
+      strcpy(s->string, strC);
+      s->bytesAlocados = bytesPontenciaDeDois;
+      s->tamanhoCaracteres = verifica;
+    } else if (x == 0)
+    {
+      s->string = malloc(bytesPontenciaDeDois);
+      s->bytesAlocados = bytesPontenciaDeDois;
+      s->tamanhoCaracteres = verifica;
+    }
+  }
+  free(copia);
   return s;
 }
 
 void s_destroi(Str s)
 {
   s_ok(s);
+  free(s->string);
   free(s);
 }
 
@@ -111,12 +126,13 @@ Str s_cria_de_arquivo(char *nome)
 int s_tam(Str_c s)
 {
   s_ok(s);
-  int x = strlen(s);
-  if (x > 0){
-    return x;
+  int x = strlen(s->string);
+  int verifica = u8_conta_unichar_nos_bytes(x, s->string);
+  if (verifica > 0){
+    return verifica;
+  } else {
+    return 0;
   }
-  
-  return 0;
 }
 
 char *s_strc(Str_c s)
@@ -140,6 +156,12 @@ bool s_igual(Str_c s, Str_c sb)
 {
   s_ok(s);
   s_ok(sb);
+  int x = strcmp(s->string, sb->string);
+  if (x == 0){
+    return true;
+  } else {
+    return false;
+  }
 }
 
 int s_busca_c(Str_c s, int pos, Str_c sb)
@@ -185,11 +207,21 @@ int s_busca_s(Str_c s, int pos, Str_c buscada)
 
 // operações de alteração {{{1
 
+//sb vai ser a string a ser inserida
 void s_substitui(Str s, int pos, int tam, Str_c sb)
 {
   s_ok(s);
   s_ok(sb);
+  int *Ppos = pos;
+  byte *copia = s->string;
+  arrumaPos(Ppos, copia);
+  byte algumaCoisa = u8_avanca_unichar(copia, pos);
+  for (int i = 0; i < tam; i++)
+  {
+    /* code */
+  }
   
+
 }
 
 void s_substring(Str s, Str_c sb, int pos, int tam)
@@ -242,7 +274,7 @@ void s_apara(Str s, Str_c sobras)
 void s_imprime(Str_c s)
 {
   s_ok(s);
-  printf("%s", s);
+  printf("%s", s->string);
 }
 
 void s_grava_arquivo(Str_c s, char *nome)
