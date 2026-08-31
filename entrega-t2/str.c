@@ -40,13 +40,34 @@ static void quantidadeCaracteres(Str l){
 }
 
 static void arrumaPos(int *pos, byte *texto){
-  if (pos < 0){
+  if (*pos < 0){
     int tamTex = strlen(texto);
     int x = u8_conta_unichar_nos_bytes(tamTex, texto);
-    if(x != -1){
-      pos = pos + (x+1); //pos+tam+1 inverte a pos
+    if (x != -1){
+      if (*pos > x){
+        *pos = x;
+      }else if(*pos < 0 && *pos + (x + 1) < 0){
+        *pos = 0;
+      } else if(*pos < 0){
+        *pos = *pos + (x + 1); //pos+tam+1 inverte a pos
+      }
     }
   }
+}
+
+static void arrumaSb(Str_c sb){
+  if (sb == NULL){
+    sb = malloc(sizeof(Str_c));
+    strcpy(sb->string, "");
+  }
+}
+
+static int alocacao(int x){
+  int bytesPontenciaDeDois = MIN_ALLOC;
+  for(int i = 0; bytesPontenciaDeDois < x; i++){
+    bytesPontenciaDeDois = bytesPontenciaDeDois * 2;
+  }
+  return bytesPontenciaDeDois;
 }
 
 // verifica se a string cad está de acordo com a especificação
@@ -66,7 +87,6 @@ Str s_cria(char const *strC)
 {
   Str s = malloc(sizeof(*s));
   assert(s != NULL);
-  int bytesPontenciaDeDois = MIN_ALLOC;
   int x = tamanhoBytesStrC(strC);
   byte *copia;
   copia = malloc(x);
@@ -74,18 +94,16 @@ Str s_cria(char const *strC)
   int verifica = u8_conta_unichar_nos_bytes(x, copia);
   if (verifica > -1){
     //da pra fazer em um while
-    for(int i = 0; bytesPontenciaDeDois < x; i++){
-      bytesPontenciaDeDois = bytesPontenciaDeDois * 2;
-    }
-    if (bytesPontenciaDeDois >= x && bytesPontenciaDeDois <= 3 * bytesPontenciaDeDois){
-      s->string = malloc(bytesPontenciaDeDois);
+    int k = alocacao(x);
+    if (k >= x && k <= 3 * k){
+      s->string = malloc(k);
       strcpy(s->string, strC);
-      s->bytesAlocados = bytesPontenciaDeDois;
+      s->bytesAlocados = k;
       s->tamanhoCaracteres = verifica;
     } else if (x == 0)
     {
-      s->string = malloc(bytesPontenciaDeDois);
-      s->bytesAlocados = bytesPontenciaDeDois;
+      s->string = malloc(k);
+      s->bytesAlocados = k;
       s->tamanhoCaracteres = verifica;
     }
   }
@@ -117,7 +135,21 @@ Str s_cria_cópia(Str_c s)
 Str s_cria_de_arquivo(char *nome)
 {
   Str s = s_cria("");
-  //...
+  FILE *arquivo;
+  arquivo = fopen(nome, "r");
+  if(arquivo == NULL){
+    return s;
+  }
+  fseek(arquivo, 0, SEEK_END);
+  long cursor = ftell(arquivo);
+  s->string = realloc(s->string, (cursor + 1) * sizeof(char));
+  fseek(arquivo, 0, SEEK_SET);
+  fread(s->string, sizeof(char), cursor,arquivo);
+  s->string[cursor] = '\0';
+  byte *copia = s->string;
+  int x = strlen(s->string);
+  s->bytesAlocados = x;
+  s->tamanhoCaracteres = u8_conta_unichar_nos_bytes(x, copia);
   return s;
 }
 
@@ -145,7 +177,7 @@ char *s_strc(Str_c s)
 unichar s_ch(Str_c s, int pos)
 {
   s_ok(s);
-  //...
+  
   return UNI_INV;
 }
 
@@ -212,16 +244,23 @@ void s_substitui(Str s, int pos, int tam, Str_c sb)
 {
   s_ok(s);
   s_ok(sb);
-  int *Ppos = pos;
+  int *Ppos = &pos;
   byte *copia = s->string;
   arrumaPos(Ppos, copia);
-  byte algumaCoisa = u8_avanca_unichar(copia, pos);
-  for (int i = 0; i < tam; i++)
-  {
-    /* code */
+  int tamTex = strlen(s->string);
+  int tamTotal = u8_conta_unichar_nos_bytes(tamTex, s->string);
+  if(tam < 0){
+    tam = tamTotal - pos;
+  }
+  arrumaSb(sb);
+  int x = s_tam(sb);
+  for (int i = 0; i < x; i++){
+    byte *algumaCoisa = u8_avanca_unichar(copia, pos);
+    char *salvaChar = algumaCoisa;
+    *algumaCoisa = sb->string[i];
+    pos = pos + 1;
   }
   
-
 }
 
 void s_substring(Str s, Str_c sb, int pos, int tam)
@@ -281,7 +320,8 @@ void s_grava_arquivo(Str_c s, char *nome)
 {
   s_ok(s);
   FILE *arquivo;
-  arquivo = fopen("nome.txt", "w");
+  arquivo = fopen(nome, "w");
+  assert(arquivo != NULL);
   fprintf(arquivo, "%s", s);
   fclose(arquivo);
 }
