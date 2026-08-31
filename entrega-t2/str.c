@@ -65,7 +65,9 @@ static void arrumaSb(Str_c sb){
 static int alocacao(int x){
   int bytesPontenciaDeDois = MIN_ALLOC;
   for(int i = 0; bytesPontenciaDeDois < x; i++){
-    bytesPontenciaDeDois = bytesPontenciaDeDois * 2;
+    if (bytesPontenciaDeDois <= x && bytesPontenciaDeDois <= 3 * bytesPontenciaDeDois){
+      bytesPontenciaDeDois = bytesPontenciaDeDois * 2;
+    }
   }
   return bytesPontenciaDeDois;
 }
@@ -95,17 +97,10 @@ Str s_cria(char const *strC)
   if (verifica > -1){
     //da pra fazer em um while
     int k = alocacao(x);
-    if (k >= x && k <= 3 * k){
-      s->string = malloc(k);
-      strcpy(s->string, strC);
-      s->bytesAlocados = k;
-      s->tamanhoCaracteres = verifica;
-    } else if (x == 0)
-    {
-      s->string = malloc(k);
-      s->bytesAlocados = k;
-      s->tamanhoCaracteres = verifica;
-    }
+    s->string = malloc(k);
+    strcpy(s->string, strC);
+    s->bytesAlocados = k;
+    s->tamanhoCaracteres = verifica;
   }
   free(copia);
   return s;
