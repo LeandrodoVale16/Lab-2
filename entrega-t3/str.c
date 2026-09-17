@@ -1,6 +1,7 @@
 // includes, constantes e declarações {{{1
 #include "str.h"
 #include "utf8.h"
+#include "lista.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -121,6 +122,31 @@ Str s_cria(char const *strC) //tem problema
   return s;
 }
 
+Str s_cria_número(double num)
+{
+  char temp[100];
+  sprintf(temp, "%.5f", num);
+  Str retorno = s_cria(temp);
+  return retorno;
+}
+
+Str s_cria_unindo(Lista l, Str sep){
+  s_ok(sep);
+  Str retorno = s_cria("");
+  int total = l_tam(l);
+  for (int i = 0; i < total; i++){
+    dado_t elemento = l_dado_pos(l, i);
+    if (elemento != NULL){
+      s_anexa(retorno, elemento);
+    }
+    if (sep != NULL && i < total - 1){
+      s_anexa(retorno, sep);
+    }
+    
+  }
+  return retorno;
+}
+
 void s_destroi(Str s)
 {
   s_ok(s);
@@ -195,10 +221,10 @@ char *s_strc(Str_c s)
 unichar s_ch(Str_c s, int pos)
 {
   s_ok(s);
+  arrumaPos(&pos, s->string);
   if (pos > s_tam(s) || s->string == NULL){
     return UNI_INV;
   }
-  arrumaPos(&pos, s->string);
   byte *ptrChar = u8_avanca_unichar(s->string, pos);
   int bytesRestantes = strlen(ptrChar);
   unichar codificacao;
@@ -208,6 +234,15 @@ unichar s_ch(Str_c s, int pos)
     return x;
   }
   return codificacao;
+}
+
+double s_número(Str_c s)
+{
+  s_ok(s);
+  if (s->string == NULL) return 0.0;
+  double resultado;
+  sscanf(s->string, "%lf", &resultado);
+  return resultado;
 }
 
 
@@ -310,7 +345,7 @@ int s_busca_s(Str_c s, int pos, Str_c buscada)
     bool achouTodas = true;
     for (int j = 0; j < s_tam(buscada); j++){
       unichar c = s_ch(s, i);
-      unichar cSb = s_ch(buscada, i + j);
+      unichar cSb = s_ch(buscada, j);
       if (c != cSb){
         achouTodas = false;
         break;
