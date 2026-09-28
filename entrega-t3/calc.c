@@ -27,14 +27,19 @@ static bool OperadoresBool(Str txt, int pos){
     return false;
 }
 
+static bool Hashtag(Str txt, int pos){
+    if (txt == NULL) return false;
+    if(s_ch(txt, pos) == '#')return true;
+    return false;
+}
+
 static bool variavel(Str txt, int pos){
     if (txt == NULL) return false;
     unichar conversao = s_ch(txt, pos);
-    if(conversao >= 'a' && conversao <= 'z' || conversao >= 'A' && conversao <= 'Z' || 
-    conversao == '#'){
+    if(conversao >= 'a' && conversao <= 'z' || conversao >= 'A' && conversao <= 'Z'){
         return true;
     }
-    return false;
+    return false;   
 }
 
 static void conta(Lista operadores, Lista operandos, Dicionário dic){
@@ -51,7 +56,7 @@ static void conta(Lista operadores, Lista operandos, Dicionário dic){
     }   
     if (numero(DadoNumero, 0) == true){
         Number = s_número(DadoNumero);
-    } else if (variavel(DadoNumero, 0) == true){
+    } else if (variavel(DadoNumero, 0) == true || Hashtag(DadoNumero,0) == true){
         valor_t ValorUm = dic_busca(dic, DadoNumero);
         if (ValorUm == VALOR_NÃO_EXISTE){
             l_empilha(operandos, s_cria("#ERRO"));
@@ -63,7 +68,7 @@ static void conta(Lista operadores, Lista operandos, Dicionário dic){
         return;
     }
     if (sinal == '='){
-        if(variavel(DadoDois,0) == false){
+        if(variavel(DadoDois,0) == false  && Hashtag(DadoDois,0) == false){
             l_empilha(operandos, s_cria("#ERRO"));
             return;
         }
@@ -73,7 +78,7 @@ static void conta(Lista operadores, Lista operandos, Dicionário dic){
     }
     if (numero(DadoDois, 0) == true){
         NumberDois = s_número(DadoDois);
-    } else if (variavel(DadoDois, 0) == true){
+    } else if (variavel(DadoDois, 0) == true || Hashtag(DadoDois,0) == true){
         valor_t ValorDois = dic_busca(dic, DadoDois);
         if (ValorDois == VALOR_NÃO_EXISTE){
             l_empilha(operandos, s_cria("#ERRO"));
@@ -126,6 +131,10 @@ static void EmpilhaNumero(dado_t dado, Lista operandos){
 }
 
 static void EmpilhaVariavel(dado_t dado, Lista operandos){
+    if (Hashtag(dado,0) == true){
+        
+        l_empilha(operandos, dado);
+    }
     if (variavel(dado, 0) == true){
         l_empilha(operandos, dado);
     }
@@ -201,9 +210,11 @@ Lista tokeniza(Str txt){
             } else if (OperadoresBool(txt, pos) == true){
                 l_insere_fim(retorno, s_cria_substring(txt, pos, 1));
                 pos++;
-            } else if (variavel(txt, pos) == true){
+            }else if (variavel(txt, pos) == true || Hashtag(txt, pos) == true){
                 tamInicio = pos;
-                while ((pos < s_tam(txt) && (variavel(txt, pos) == true || numero (txt, pos) == true))){
+                if(Hashtag(txt, pos) == true) pos++;
+                while ((pos < s_tam(txt) && (variavel(txt, pos) == true || numero (txt, pos) == true))
+                && Hashtag(txt,pos) == false){
                     pos++;
                 }
                 l_insere_fim(retorno, s_cria_substring(txt, tamInicio, pos - tamInicio));
