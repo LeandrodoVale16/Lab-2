@@ -1,10 +1,8 @@
 #include "str.h"
-
+#include "lista.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-
-typedef Str dado_t;
 
 typedef struct no{
     dado_t dados;
@@ -42,7 +40,8 @@ Lista l_cria_separando(Str s, Str sep){
     while (pos != -1 && pos < s_tam(s)){
         fim = s_busca_c(s, pos, sep);
         if(fim == -1) fim = s_tam(s);
-        dado_t d = s_cria_substring(s, pos, fim - pos);
+        dado_t d = malloc(sizeof(dado_t));
+        d = s_cria_substring(s, pos, fim - pos);
         l_insere_fim(temp, d);
         pos = s_busca_nc(s, fim, sep);
     }
@@ -94,22 +93,38 @@ void l_imprime(Lista l){
 void l_insere_inicio(Lista l, dado_t d){
     Node *p = malloc(sizeof(Node));
     p->dados = d;
-    l->sentinela->prox->ant = p;
-    p->prox = l->sentinela->prox;
-    l->sentinela->prox = p;
-    p->ant = l->sentinela;
-    l->tam++;
+    if (l->sentinela->prox == NULL && l->sentinela->ant == NULL)
+    {
+        l->sentinela->prox = p;
+        l->sentinela->ant = p;
+        p->ant = l->sentinela;
+        p->prox = l->sentinela;
+    } else{
+        l->sentinela->prox->ant = p;
+        p->prox = l->sentinela->prox;
+        l->sentinela->prox = p;
+        p->ant = l->sentinela;
+        l->tam++;
+    }
 }
 
 // insere o dado d no final da lista l
 void l_insere_fim(Lista l, dado_t d){
     Node *p = malloc(sizeof(Node));
     p->dados = d;
-    l->sentinela->ant->prox = p;
-    p->prox = l->sentinela;
-    p->ant = l->sentinela->ant;
-    l->sentinela->ant = p;
-    l->tam++;
+    if (l->sentinela->prox == NULL && l->sentinela->ant == NULL)
+    {
+        l->sentinela->ant = p;
+        l->sentinela->prox = p;
+        p->ant = l->sentinela;
+        p->prox = l->sentinela;
+    } else {
+        l->sentinela->ant->prox = p;
+        p->prox = l->sentinela;
+        p->ant = l->sentinela->ant;
+        l->sentinela->ant = p;
+        l->tam++;
+    }
 }
 
 // insere o dado d na lista l, de forma que ele fique na posição p
@@ -119,6 +134,7 @@ void l_insere_pos(Lista l, dado_t d, int p){
     temp->dados = d;
     Node *loop = l->sentinela;
     loop = loop->prox;
+    if (l->sentinela->prox == NULL && l->sentinela->ant == NULL) p = 0;
     for (int i = 0; i < p; i++){
         loop = loop->prox;
     }
@@ -147,14 +163,20 @@ dado_t l_dado_pos(Lista l, int pos){
     while(temp->dados != NULL){
         if(k == pos) return temp->dados;
         temp = temp->prox;
+        k++;
     }
-    return NULL;
+    dado_t d = NULL;
+    return d;
 }
 
 // remove e retorna o dado no início da lista
 dado_t l_remove_inicio(Lista l){
     Node *remover = l->sentinela->prox;
-    dado_t *temp = remover->dados;
+    if (l_vazia(l) == true){
+        dado_t d = NULL;
+        return d;
+    }
+    dado_t temp = remover->dados;
     l->sentinela->prox = remover->prox;
     remover->prox->ant = l->sentinela;
     free(remover);
@@ -165,6 +187,10 @@ dado_t l_remove_inicio(Lista l){
 // remove e retorna o dado no final da lista
 dado_t l_remove_fim(Lista l){
     dado_t temp;
+    if (l_vazia(l) == true){
+        temp = NULL;
+        return temp;
+    }
     l->sentinela->ant = l->sentinela->ant->ant;
     temp = l->sentinela->ant->prox->dados;
     free(l->sentinela->ant->prox);
@@ -227,7 +253,10 @@ dado_t l_remove(Lista l){
 
 // retorna o dado que está no topo da pilha
 dado_t l_topo(Lista l){
-    if (l_vazia(l) == true) return NULL;
+    if (l_vazia(l) == true){
+        dado_t d = NULL;
+        return d;
+    }
     return l->sentinela->ant->dados;
 }
 
@@ -235,15 +264,26 @@ dado_t l_topo(Lista l){
 void l_empilha(Lista l, dado_t d){
     Node *p = malloc(sizeof(Node));
     p->dados = d;
-    l->sentinela->ant->prox = p;
-    p->ant = l->sentinela->ant;
-    p->prox = l->sentinela;
-    l->sentinela->ant = p;
-    l->tam++;
+    if(l == NULL){
+        l->sentinela->ant = p;
+        p->prox = l->sentinela;
+        l->sentinela->prox = p;
+        p->ant = l->sentinela;
+    } else{
+        l->sentinela->ant->prox = p;
+        p->ant = l->sentinela->ant;
+        p->prox = l->sentinela;
+        l->sentinela->ant = p;
+        l->tam++;
+    }
 }
 
 // remove e retorna o dado que está no topo da pilha
 dado_t l_desempilha(Lista l){
+    if (l_vazia(l) == true){
+        dado_t d = NULL;
+        return d;
+    }
     dado_t temp = l_topo(l);
     l->sentinela->ant = l->sentinela->ant->ant;
     free(l->sentinela->ant->prox);

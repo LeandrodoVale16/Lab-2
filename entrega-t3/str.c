@@ -135,7 +135,8 @@ Str s_cria_unindo(Lista l, Str sep){
   Str retorno = s_cria("");
   int total = l_tam(l);
   for (int i = 0; i < total; i++){
-    dado_t elemento = l_dado_pos(l, i);
+    dado_t elemento = malloc(sizeof(dado_t));
+    elemento = l_dado_pos(l, i);
     if (elemento != NULL){
       s_anexa(retorno, elemento);
     }
@@ -512,7 +513,7 @@ void s_imprime(Str_c s)
   {
     printf("");
   }else{
-    printf("%s", s->string);
+    printf("%s\n", s->string);
   }
 }
 

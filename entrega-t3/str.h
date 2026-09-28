@@ -2,8 +2,6 @@
 #define _STR_H_
 
 #include "utf8.h"
-#include "lista.h"
-
 #include <stdbool.h>
 
 // string (Str)
@@ -29,6 +27,8 @@ typedef struct str *Str;
 // Str_c é uma string não alterável
 //   usado para declarar parâmetros que a função não tem o direito de alterar
 typedef struct str const *Str_c;
+
+#include "lista.h"
 
 // operações {{{1
 

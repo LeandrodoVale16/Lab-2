@@ -7,7 +7,6 @@
 typedef struct lista *Lista;
 
 #include "str.h"
-
 #include <stdbool.h>
 
 // o tipo dos dados mantidos pela lista
