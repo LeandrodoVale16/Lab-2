@@ -11,6 +11,8 @@ typedef struct no{
 
 struct fila{
     No no;
+    No atual;
+    bool FimInicio;
     int tam_do_dado;
 };
 
@@ -30,6 +32,8 @@ static int ConcertaPosicao(int pos, Fila f){
 Fila f_cria(int tam_do_dado){
     Fila aux = malloc(sizeof(struct fila));
     aux->no = NULL;
+    aux->atual = NULL;
+    aux->FimInicio = false;
     aux->tam_do_dado = tam_do_dado;
     return aux;
 }
@@ -102,23 +106,25 @@ void f_insere(Fila self, void *pdado){
 // cada dado do percurso será acessado por chamadas a f_próximo()
 void f_inicia_percurso(Fila self, int pos_inicial){
     bool FimInicio = false;
+    void *pdado;
     if (pos_inicial < 0){
         pos_inicial = ConcertaPosicao(pos_inicial, self);
-        FimInicio = true;
+        self->FimInicio = true;
     } 
     No temp = self->no;
     for (int i = 0; i < pos_inicial; i++){
         temp = temp->prox;
     }
-    
-    
+    self->atual = temp;
 }
 
 // caso o percurso tenha terminado, retorna false
 // senão, coloca o próximo dado do percurso em *pdado (se pdado não for NULL),
 //   e retorna true
 bool f_próximo(Fila self, void *pdado){ 
-    if (self->no == NULL) return false;
-    if (pdado != NULL) memcpy(pdado, self->no->dado, self->tam_do_dado);
+    if (self->atual == NULL) return false;
+    if (pdado != NULL) memcpy(pdado, self->atual->dado, self->tam_do_dado);
+    if (self->FimInicio)self->atual = self->atual->ant; 
+    else self->atual = self->atual->prox;
     return true;
 }
