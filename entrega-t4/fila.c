@@ -105,12 +105,10 @@ void f_insere(Fila self, void *pdado){
 //   -2 é a posição do penúltimo dado, etc
 // cada dado do percurso será acessado por chamadas a f_próximo()
 void f_inicia_percurso(Fila self, int pos_inicial){
-    bool FimInicio = false;
-    void *pdado;
     if (pos_inicial < 0){
         pos_inicial = ConcertaPosicao(pos_inicial, self);
         self->FimInicio = true;
-    } 
+    } else self->FimInicio = false;
     No temp = self->no;
     for (int i = 0; i < pos_inicial; i++){
         temp = temp->prox;
@@ -124,7 +122,7 @@ void f_inicia_percurso(Fila self, int pos_inicial){
 bool f_próximo(Fila self, void *pdado){ 
     if (self->atual == NULL) return false;
     if (pdado != NULL) memcpy(pdado, self->atual->dado, self->tam_do_dado);
-    if (self->FimInicio)self->atual = self->atual->ant; 
+    if (self->FimInicio) self->atual = self->atual->ant; 
     else self->atual = self->atual->prox;
     return true;
 }
