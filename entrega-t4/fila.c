@@ -110,7 +110,7 @@ void f_inicia_percurso(Fila self, int pos_inicial){
         self->FimInicio = true;
     } else self->FimInicio = false;
     No temp = self->no;
-    for (int i = 0; i < pos_inicial; i++){
+    for (int i = 0; i < pos_inicial && temp != NULL && temp->prox != NULL; i++){
         temp = temp->prox;
     }
     self->atual = temp;

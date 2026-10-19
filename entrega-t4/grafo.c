@@ -1,16 +1,10 @@
-#include "grafo.h"
+#ifndef _GRAFO_H_
+#define _GRAFO_H_
+
+typedef struct grafo *Grafo;
+
 #include "fila.h"
 #include <stdbool.h>
-
-typedef struct no{
-    void *dado;
-    
-}*NO;
-
-
-struct grafo{
-
-};
 
 // funções que implementam as operações básicas de um grafo
 //
@@ -33,47 +27,33 @@ struct grafo{
 
 // cria um grafo vazio que suporta dados do tamanho fornecido (em bytes)
 //   nos nós e nas arestas
-Grafo g_cria(int tam_nó, int tam_aresta){
-
-}
+Grafo g_cria(int tam_nó, int tam_aresta);
 
 // libera a memória ocupada por um grafo
-void g_destrói(Grafo self){
-
-}
+void g_destrói(Grafo self);
 
 // Nós
 
 // insere um nó no grafo, com o dado apontado por p_dado
 // retorna o número do novo nó (que é o número de nós que
 //   existia antes da inserção)
-int g_insere_nó(Grafo self, void *p_dado){
-
-}
+int g_insere_nó(Grafo self, void *p_dado);
 
 // remove um nó do grafo e as arestas incidentes nesse nó
 // a identificação dos nós remanescentes é alterada, como se esse nó nunca
 //   tivesse existido
-void g_remove_nó(Grafo self, int nó){
-
-}
+void g_remove_nó(Grafo self, int nó);
 
 // altera o valor associado a um nó (copia o valor apontado por p_dado para
 //   uma memória gerenciada pelo grafo)
-void g_altera_valor_do_nó(Grafo self, int nó, void *p_dado){
-
-}
+void g_altera_valor_do_nó(Grafo self, int nó, void *p_dado);
 
 // retorna um ponteiro para o valor associado a um nó que está na memória
 //   gerenciada pelo grafo.
-void *g_valor_do_nó(Grafo self, int nó){
-
-}
+void *g_valor_do_nó(Grafo self, int nó);
 
 // retorna o número de nós do grafo
-int g_num_nós(Grafo self){
-
-}
+int g_num_nós(Grafo self);
 
 // Arestas
 
@@ -81,30 +61,23 @@ int g_num_nós(Grafo self){
 //   (copia de *p_dado para uma memória gerenciada pelo grafo)
 // caso a aresta não exista, deve ser criada
 // caso p_dado seja NULL, a aresta deve ser removida
-void g_altera_valor_da_aresta(Grafo self, int nó_origem, int nó_destino, void *p_dado){
-    
-}
+void g_altera_valor_da_aresta(Grafo self, int nó_origem, int nó_destino,
+                              void *p_dado);
 
 // retorna um ponteiro para o valor associado à aresta entre nó_origem e 
 //   nó_destino, localizado em memória gerenciada pelo grafo.
 // retorna NULL se tal aresta não existir
-void *g_valor_da_aresta(Grafo self, int nó_origem, int nó_destino){
-
-}
+void *g_valor_da_aresta(Grafo self, int nó_origem, int nó_destino);
 
 // inicia uma consulta a arestas que partem do nó origem
 // as próximas chamadas a 'g_próxima_aresta' devem retornar os valores
 //   correspondentes a cada aresta que parte desse nó
-void g_arestas_que_partem(Grafo self, int nó_origem){
-
-}
+void g_arestas_que_partem(Grafo self, int nó_origem);
 
 // inicia uma consulta a arestas que chegam ao nó destino
 // as próximas chamadas a 'g_próxima_aresta' devem retornar os valores
 //   correspondentes a cada aresta que chega nesse nó
-void g_arestas_que_chegam(Grafo self, int nó_destino){
-
-}
+void g_arestas_que_chegam(Grafo self, int nó_destino);
 
 // retorna um ponteiro para o dado associado à próxima aresta, de acordo
 //   com a última consulta iniciada por 'g_arestas_que_partem' ou 
@@ -112,22 +85,18 @@ void g_arestas_que_chegam(Grafo self, int nó_destino){
 // o valor do nó vizinho ao nó da consulta deve ser colocado em '*p_nó_vizinho'
 //   (se não for NULL)
 // caso não exista mais aresta que satisfaça a consulta, retorna NULL.
-void *g_próxima_aresta(Grafo self, int *p_nó_vizinho){
-
-}
+void *g_próxima_aresta(Grafo self, int *p_nó_vizinho);
 
 // Algoritmos
 
 // retorna true se grafo é cíclico, false caso contrário
-bool g_tem_ciclo(Grafo self){
-
-}
+bool g_tem_ciclo(Grafo self);
 
 // retorna uma fila de inteiros contendo os números dos nós do grafo em
 //   uma ordem em que, se o nó 'a' antecede 'b', não existe uma aresta
 //   de 'b' para 'a' no grafo
 // deve retornar uma fila vazia caso tal ordem não exista
 // quem chama esta função é responsável por destruir a fila.
-Fila g_ordem_topológica(Grafo self){
+Fila g_ordem_topológica(Grafo self);
 
-}
+#endif //_GRAFO_H_
