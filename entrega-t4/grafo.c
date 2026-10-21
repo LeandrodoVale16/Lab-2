@@ -1,10 +1,24 @@
-#ifndef _GRAFO_H_
-#define _GRAFO_H_
-
-typedef struct grafo *Grafo;
-
 #include "fila.h"
+#include "grafo.h"
 #include <stdbool.h>
+
+typedef struct aresta{
+    int proxNo;
+    void *dado;
+    struct aresta *prox;
+}*Aresta;
+
+typedef struct no{
+    void *valorNo;
+    Aresta arestaPrincipal;
+}*No;
+
+struct grafo{
+    int NumVertice;
+    No *NoPrincipal;
+    int tam_no;
+    int tam_aresta;
+};
 
 // funções que implementam as operações básicas de um grafo
 //
@@ -27,7 +41,9 @@ typedef struct grafo *Grafo;
 
 // cria um grafo vazio que suporta dados do tamanho fornecido (em bytes)
 //   nos nós e nas arestas
-Grafo g_cria(int tam_nó, int tam_aresta);
+Grafo g_cria(int tam_nó, int tam_aresta){
+
+}
 
 // libera a memória ocupada por um grafo
 void g_destrói(Grafo self);
@@ -98,5 +114,3 @@ bool g_tem_ciclo(Grafo self);
 // deve retornar uma fila vazia caso tal ordem não exista
 // quem chama esta função é responsável por destruir a fila.
 Fila g_ordem_topológica(Grafo self);
-
-#endif //_GRAFO_H_
