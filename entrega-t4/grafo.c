@@ -1,10 +1,12 @@
 #include "fila.h"
 #include "grafo.h"
 #include <stdbool.h>
+#include <string.h>
+#include <stdlib.h>
 
 typedef struct aresta{
     int proxNo;
-    void *dado;
+    void *valorAresta;
     struct aresta *prox;
 }*Aresta;
 
@@ -14,7 +16,7 @@ typedef struct no{
 }*No;
 
 struct grafo{
-    int NumVertice;
+    int NumNos;
     No *NoPrincipal;
     int tam_no;
     int tam_aresta;
@@ -42,18 +44,36 @@ struct grafo{
 // cria um grafo vazio que suporta dados do tamanho fornecido (em bytes)
 //   nos nós e nas arestas
 Grafo g_cria(int tam_nó, int tam_aresta){
-
+    Grafo g = malloc(sizeof(struct grafo));
+    if (g == NULL) return NULL;
+    g->NoPrincipal = NULL;
+    g->NumNos = 0;
+    g->tam_aresta = tam_aresta;
+    g->tam_no = tam_nó;
+    return g;
 }
 
 // libera a memória ocupada por um grafo
-void g_destrói(Grafo self);
+void g_destrói(Grafo self){
+    free(self->NoPrincipal);
+    free(self);
+}
 
 // Nós
 
 // insere um nó no grafo, com o dado apontado por p_dado
 // retorna o número do novo nó (que é o número de nós que
 //   existia antes da inserção)
-int g_insere_nó(Grafo self, void *p_dado);
+int g_insere_nó(Grafo self, void *p_dado){
+    No node = malloc(sizeof(struct no));
+    node->valorNo = malloc(self->tam_no);
+    node->arestaPrincipal = NULL;
+    memcpy(node->valorNo, p_dado, self->tam_no);
+    self->NoPrincipal = realloc(self->NoPrincipal, (self->NumNos + 1) * sizeof(No));
+    self->NoPrincipal[self->NumNos] = node;
+    self->NumNos+= 1;
+    return self->NumNos - 1; 
+}
 
 // remove um nó do grafo e as arestas incidentes nesse nó
 // a identificação dos nós remanescentes é alterada, como se esse nó nunca
@@ -69,7 +89,9 @@ void g_altera_valor_do_nó(Grafo self, int nó, void *p_dado);
 void *g_valor_do_nó(Grafo self, int nó);
 
 // retorna o número de nós do grafo
-int g_num_nós(Grafo self);
+int g_num_nós(Grafo self){
+    return self->NumNos;
+}
 
 // Arestas
 
@@ -77,8 +99,7 @@ int g_num_nós(Grafo self);
 //   (copia de *p_dado para uma memória gerenciada pelo grafo)
 // caso a aresta não exista, deve ser criada
 // caso p_dado seja NULL, a aresta deve ser removida
-void g_altera_valor_da_aresta(Grafo self, int nó_origem, int nó_destino,
-                              void *p_dado);
+void g_altera_valor_da_aresta(Grafo self, int nó_origem, int nó_destino, void *p_dado);
 
 // retorna um ponteiro para o valor associado à aresta entre nó_origem e 
 //   nó_destino, localizado em memória gerenciada pelo grafo.
