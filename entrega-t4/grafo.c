@@ -78,15 +78,34 @@ int g_insere_nó(Grafo self, void *p_dado){
 // remove um nó do grafo e as arestas incidentes nesse nó
 // a identificação dos nós remanescentes é alterada, como se esse nó nunca
 //   tivesse existido
-void g_remove_nó(Grafo self, int nó);
+void g_remove_nó(Grafo self, int nó){
+    //falta coisa
+    No aux = self->NoPrincipal[nó];
+    if(nó != self->NumNos - 1){
+        for (int i = nó; i < self->NumNos - 1; i++){
+            self->NoPrincipal[i] = self->NoPrincipal[i+1];
+            self->NoPrincipal[i]->arestaPrincipal->proxNo--;
+        }
+    }
+    self->NumNos--;
+    free(aux->arestaPrincipal->valorAresta);
+    free(aux->arestaPrincipal->proxNo);
+    free(aux->arestaPrincipal);
+    free(aux->valorNo);
+    free(aux);
+}
 
 // altera o valor associado a um nó (copia o valor apontado por p_dado para
 //   uma memória gerenciada pelo grafo)
-void g_altera_valor_do_nó(Grafo self, int nó, void *p_dado);
+void g_altera_valor_do_nó(Grafo self, int nó, void *p_dado){
+    memcpy(self->NoPrincipal[nó]->valorNo, p_dado, self->tam_no);
+}
 
 // retorna um ponteiro para o valor associado a um nó que está na memória
 //   gerenciada pelo grafo.
-void *g_valor_do_nó(Grafo self, int nó);
+void *g_valor_do_nó(Grafo self, int nó){
+    return self->NoPrincipal[nó]->valorNo;
+}
 
 // retorna o número de nós do grafo
 int g_num_nós(Grafo self){
@@ -104,7 +123,9 @@ void g_altera_valor_da_aresta(Grafo self, int nó_origem, int nó_destino, void 
 // retorna um ponteiro para o valor associado à aresta entre nó_origem e 
 //   nó_destino, localizado em memória gerenciada pelo grafo.
 // retorna NULL se tal aresta não existir
-void *g_valor_da_aresta(Grafo self, int nó_origem, int nó_destino);
+void *g_valor_da_aresta(Grafo self, int nó_origem, int nó_destino){
+    
+}
 
 // inicia uma consulta a arestas que partem do nó origem
 // as próximas chamadas a 'g_próxima_aresta' devem retornar os valores
@@ -122,7 +143,9 @@ void g_arestas_que_chegam(Grafo self, int nó_destino);
 // o valor do nó vizinho ao nó da consulta deve ser colocado em '*p_nó_vizinho'
 //   (se não for NULL)
 // caso não exista mais aresta que satisfaça a consulta, retorna NULL.
-void *g_próxima_aresta(Grafo self, int *p_nó_vizinho);
+void *g_próxima_aresta(Grafo self, int *p_nó_vizinho){
+
+}
 
 // Algoritmos
 
