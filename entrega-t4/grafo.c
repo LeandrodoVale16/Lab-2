@@ -20,6 +20,7 @@ typedef struct no{
     void *valorNo;
     Aresta arestaPrincipal;
     status estadoVisita;
+    int dependencias;
 }*No;
 
 struct grafo{
@@ -28,6 +29,9 @@ struct grafo{
     Aresta ArestaAtual;
     int tam_no;
     int tam_aresta;
+    bool chegam;
+    int nóDestino;
+    int nóOrigem;
 };
 
 // funções que implementam as operações básicas de um grafo
@@ -59,6 +63,9 @@ Grafo g_cria(int tam_nó, int tam_aresta){
     g->NumNos = 0;
     g->tam_aresta = tam_aresta;
     g->tam_no = tam_nó;
+    g->chegam = false;
+    g->nóDestino = 0;
+    g->nóOrigem = 0;
     return g;
 }
 
@@ -79,6 +86,7 @@ int g_insere_nó(Grafo self, void *p_dado){
     node->valorNo = malloc(self->tam_no);
     node->arestaPrincipal = NULL;
     node->estadoVisita = NAO_VISITADO;
+    node->dependencias = 0;
     memcpy(node->valorNo, p_dado, self->tam_no);
     self->NoPrincipal = realloc(self->NoPrincipal, (self->NumNos + 1) * sizeof(No));
     self->NoPrincipal[self->NumNos] = node;
@@ -208,14 +216,40 @@ void *g_valor_da_aresta(Grafo self, int nó_origem, int nó_destino){
 // as próximas chamadas a 'g_próxima_aresta' devem retornar os valores
 //   correspondentes a cada aresta que parte desse nó
 void g_arestas_que_partem(Grafo self, int nó_origem){
-
+    self->chegam = false;
+    self->ArestaAtual = self->NoPrincipal[nó_origem]->arestaPrincipal;
 }
 
 // inicia uma consulta a arestas que chegam ao nó destino
 // as próximas chamadas a 'g_próxima_aresta' devem retornar os valores
 //   correspondentes a cada aresta que chega nesse nó
 void g_arestas_que_chegam(Grafo self, int nó_destino){
+    self->chegam = true;
+    for (int i = 0; i < self->NumNos; i++){
+        Aresta arestas = self->NoPrincipal[i]->arestaPrincipal;
+        while (arestas != NULL){
+            if (arestas->proxNo == nó_destino){
+                self->ArestaAtual = arestas;
+                self->nóDestino = nó_destino;
+                self->nóOrigem = i;
+                return;
+            }
+            arestas = arestas->prox;
+        } 
+    }
+    self->ArestaAtual = NULL;
+}
 
+static bool encontrouArestaIgual(Grafo self, int i){
+    Aresta arestas = self->NoPrincipal[i]->arestaPrincipal;
+    while (arestas != NULL){
+        if (arestas == self->ArestaAtual){
+            self->ArestaAtual = arestas;
+            return true;
+        } 
+        arestas = arestas->prox;
+    }
+    return false;
 }
 
 // retorna um ponteiro para o dado associado à próxima aresta, de acordo
@@ -225,9 +259,7 @@ void g_arestas_que_chegam(Grafo self, int nó_destino){
 //   (se não for NULL)
 // caso não exista mais aresta que satisfaça a consulta, retorna NULL.
 void *g_próxima_aresta(Grafo self, int *p_nó_vizinho){
-    if (self->ArestaAtual == NULL) return NULL;
-    if (p_nó_vizinho != NULL) *p_nó_vizinho = self->ArestaAtual->prox->proxNo;
-    return self->ArestaAtual->valorAresta;   
+    
 }
 
 // Algoritmos
@@ -258,11 +290,55 @@ bool g_tem_ciclo(Grafo self){
     return false;
 }
 
+static void contaDependencias(Grafo self){
+    for (int i = 0; i < self->NumNos; i++){
+        self->NoPrincipal[i]->dependencias = 0;
+    }
+    
+    for (int k = 0; k < self->NumNos; k++){
+        for (int i = 0; i < self->NumNos; i++){
+            Aresta arestas = self->NoPrincipal[i]->arestaPrincipal;
+            while (arestas != NULL){
+                if(arestas->proxNo == k) self->NoPrincipal[k]->dependencias+= 1;
+                arestas = arestas->prox;
+            }
+            
+        }
+    }
+}
+
+static void dependenciasEspecificas(Grafo self, int nóProcessado, Fila filaProcessa){
+    Aresta arestas = self->NoPrincipal[nóProcessado]->arestaPrincipal;
+    while (arestas != NULL){
+        self->NoPrincipal[arestas->proxNo]->dependencias-= 1;
+        if (self->NoPrincipal[arestas->proxNo]->dependencias == 0) f_insere(filaProcessa, &arestas->proxNo);
+        arestas = arestas->prox;
+    }
+}
+
 // retorna uma fila de inteiros contendo os números dos nós do grafo em
 //   uma ordem em que, se o nó 'a' antecede 'b', não existe uma aresta
 //   de 'b' para 'a' no grafo
 // deve retornar uma fila vazia caso tal ordem não exista
 // quem chama esta função é responsável por destruir a fila.
 Fila g_ordem_topológica(Grafo self){
-    
+    //a fila guar o num do vertice q tem 0 dependencias;
+    Fila fila = f_cria(sizeof(int));
+    Fila filaProcessa = f_cria(sizeof(int));
+    contaDependencias(self);
+    if(g_tem_ciclo(self)){
+        f_destrói(filaProcessa);
+        return fila;
+    } 
+    for (int i = 0; i < self->NumNos; i++){
+        if(self->NoPrincipal[i]->dependencias == 0) f_insere(filaProcessa, &i);
+    }
+    while (!f_tá_vazia(filaProcessa)){
+        int resultado;
+        f_remove(filaProcessa, &resultado);
+        f_insere(fila, &resultado);
+        dependenciasEspecificas(self, resultado, filaProcessa);
+    }
+    f_destrói(filaProcessa);
+    return fila;
 }

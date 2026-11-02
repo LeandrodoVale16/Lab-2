@@ -1,2 +1,6 @@
 #ignorar o arquivo de exercicios
 exercico.*
+#ignorar os arquivos .java
+*.java
+#ignorar a pasta java
+JAVA/
