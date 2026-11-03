@@ -69,10 +69,26 @@ Grafo g_cria(int tam_nó, int tam_aresta){
     return g;
 }
 
+static void liberaArestasDoVertice(No node){
+    Aresta remover = node->arestaPrincipal;
+    Aresta aux;
+    while(remover != NULL) {
+        aux = remover->prox;
+        free(remover->valorAresta);
+        free(remover);
+        remover = aux;
+    }
+}
+
 // libera a memória ocupada por um grafo
 void g_destrói(Grafo self){
+    for (int i = 0; i < self->NumNos; i++){
+        No node = self->NoPrincipal[i];
+        liberaArestasDoVertice(node);
+        free(node->valorNo);
+        free(node);
+    }
     free(self->NoPrincipal);
-    free(self->ArestaAtual);
     free(self);
 }
 
@@ -111,17 +127,6 @@ static void alteraProxNo(Grafo self, int nó){
             if (temp->proxNo > nó) temp->proxNo = temp->proxNo - 1;
             temp = temp->prox;
         }
-    }
-}
-
-static void liberaArestasDoVertice(No node){
-    Aresta remover = node->arestaPrincipal;
-    Aresta aux;
-    while(remover != NULL) {
-        aux = remover->prox;
-        free(remover->valorAresta);
-        free(remover);
-        remover = aux;
     }
 }
 
@@ -240,11 +245,24 @@ void g_arestas_que_chegam(Grafo self, int nó_destino){
     self->ArestaAtual = NULL;
 }
 
-static bool encontrouArestaIgual(Grafo self, int i){
+static bool encontrouArestaNaLinha(Grafo self){
+    Aresta arestas = self->ArestaAtual->prox;
+    while (arestas != NULL){
+        if (arestas->proxNo == self->nóDestino){
+            self->ArestaAtual = arestas;
+            return true;
+        } 
+        arestas = arestas->prox;
+    }
+    return false;
+}
+
+static bool encontrouArestaAvante(Grafo self, int i){
     Aresta arestas = self->NoPrincipal[i]->arestaPrincipal;
     while (arestas != NULL){
-        if (arestas == self->ArestaAtual){
+        if (arestas->proxNo == self->nóDestino){
             self->ArestaAtual = arestas;
+            self->nóOrigem = i;
             return true;
         } 
         arestas = arestas->prox;
@@ -259,7 +277,27 @@ static bool encontrouArestaIgual(Grafo self, int i){
 //   (se não for NULL)
 // caso não exista mais aresta que satisfaça a consulta, retorna NULL.
 void *g_próxima_aresta(Grafo self, int *p_nó_vizinho){
-    
+    if (self->ArestaAtual == NULL) return NULL;
+    void *valorRetorno = self->ArestaAtual->valorAresta;
+
+    if(self->chegam){
+        if (p_nó_vizinho != NULL) *p_nó_vizinho = self->nóOrigem;
+        if (!encontrouArestaNaLinha(self)){
+            bool achou = false;
+            for (int i = self->nóOrigem + 1; i < self->NumNos; i++){
+                if (encontrouArestaAvante(self, i)){
+                    achou = true;
+                    break;
+                } 
+                
+            }
+            if (!achou)self->ArestaAtual = NULL;
+        }
+    } else {
+        if (p_nó_vizinho != NULL) *p_nó_vizinho = self->ArestaAtual->proxNo;
+        self->ArestaAtual = self->ArestaAtual->prox;
+    }
+    return valorRetorno;
 }
 
 // Algoritmos
