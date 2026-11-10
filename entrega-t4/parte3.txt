@@ -1,0 +1,24 @@
+geracao.c especie.c: podia usar um vetor alocado dinamicamente, já que sua implementação
+    futuramente pode ter mais de n_individuos (500) ou menos, então, poderia alocar/realocar o vetor conforme a necessidade 
+    (além de alocar memoria suficiente, sem ter que mudar muito o codigo)
+
+geracao.c - geração_calcula_descendentes: no fim do codigo tem o comentario: (pode ter erro de arredondamento nos cálculos
+    das espécies) isso deve ser arrumado na função espécie_calcula_descendentes, o parametro é float, porem double seria melhor 
+    para um arredondamento mais exato
+
+individuo.c - compatibilidade: na função compatibilidade poderia ser criada uma função static,
+    pois faz para o neuronio a e não para b, ja com a função static poderia fazer para a e para b
+
+individuo.c - indivíduo_mistura_sinapses: rede poderia ter uma estrutura tipo lista encadeada, e tambem uma função
+    que verificasse todas as sinapses e guardasse nessa estrutura, isso iria resolver o problema de ter dois laços,
+    deixaria o codigo mais modularizado
+
+individuo.c - indivíduo_muta: existe varios if's e else's, isso não necessariamente é um problema mas deixa confuso, fazer algumas
+    funções adicionais statics para organizar um pouco os ifs seria interessante
+
+individuo.c - id_neurônio_entre: os campos id da struct inov poderiam ser armazenados em uma ABB que guarda o numero da estrutura e
+    um id, caso um id corresponda, acessa a estrutura pelo numero da estrutura guardada, se o outro id for correspondente, retorna o
+    id do meio, do contrario, continua a procura no ABB, torna mais rapido a procura ao invés de ter que procurar uma por uma,
+    quanto maior a aplicação, mais eficiente seria a busca
+    
+

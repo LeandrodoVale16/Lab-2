@@ -4,3 +4,5 @@ exercico.*
 *.java
 #ignorar a pasta java
 JAVA/
+#ignorar arquivos .py
+*py
