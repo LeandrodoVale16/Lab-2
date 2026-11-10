@@ -20,5 +20,4 @@ individuo.c - id_neurônio_entre: os campos id da struct inov poderiam ser armaz
     um id, caso um id corresponda, acessa a estrutura pelo numero da estrutura guardada, se o outro id for correspondente, retorna o
     id do meio, do contrario, continua a procura no ABB, torna mais rapido a procura ao invés de ter que procurar uma por uma,
     quanto maior a aplicação, mais eficiente seria a busca
-    
 
