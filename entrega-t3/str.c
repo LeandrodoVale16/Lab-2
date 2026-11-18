@@ -97,20 +97,21 @@ Str s_cria(char const *strC) //tem problema
 {
   Str s = malloc(sizeof(*s));
   assert(s != NULL);
-  if (strC == NULL || strlen(strC) == 0){
+  if (strC == NULL ){
     s->string = NULL;
     s->tamanhoCaracteres = 0;
     s->bytesAlocados = 0;
     return s;
   }
   int x = tamanhoBytesStrC(strC);
-  byte *copia;
-  copia = malloc(x + 1);
+  byte *copia = malloc(x + 1);
+  assert(copia != NULL);
   strcpy(copia, strC);
   int verifica = u8_conta_unichar_nos_bytes(x, copia);
   free(copia);
   int k = alocacao(x);
   s->string = malloc(k);
+  assert(s->string != NULL);
   s->bytesAlocados = k;
   if (verifica > -1){
     strcpy(s->string, strC);
@@ -136,6 +137,7 @@ Str s_cria_unindo(Lista l, Str sep){
   int total = l_tam(l);
   for (int i = 0; i < total; i++){
     dado_t elemento = malloc(sizeof(dado_t));
+    assert(elemento != NULL);
     elemento = l_dado_pos(l, i);
     if (elemento != NULL){
       s_anexa(retorno, elemento);
@@ -215,6 +217,7 @@ char *s_strc(Str_c s)
   int x = strlen(s->string);
   char *copia;
   copia = malloc(alocacao(x) + 1);
+  assert(copia != NULL);
   strcpy(copia, s->string);
   return copia;
 }
@@ -372,21 +375,18 @@ void s_substitui(Str s, int pos, int tam, Str_c sb)
   arrumaTam(&tam, &pos, s->string);
   byte *ptrIni = u8_avanca_unichar(s->string, pos);
   byte *ptrFim = u8_avanca_unichar(ptrIni, tam);
+  byte *ptrFimString = s->string + strlen(s->string); 
+  int bytesRestantes = ptrFimString - ptrFim;
   if (sb == NULL){
-    byte *ptrFimString = s->string + strlen(s->string); 
-    int bytesRemover = ptrFim - ptrIni;
-    int bytesRestantes = ptrFimString - ptrFim;
     for (int k = 0; k <= bytesRestantes; k++){
-    ptrIni[k] = ptrFim[k];
+      ptrIni[k] = ptrFim[k];
     }
   } else{
-    byte *ptrFimString = s->string + strlen(s->string);
     int bytesSb = strlen(sb->string);
-    int bytesRemover = ptrFim - ptrIni;
-    int bytesRestantes = ptrFimString - ptrFim;
     int bytesTotais = bytesSb + bytesRestantes;
     int x = alocacao(bytesTotais);
     char *texCorreto = malloc(x);
+    assert(texCorreto != NULL);
     int j = 0;
     for (int i = 0; i < bytesSb; i++) {
       texCorreto[j++] = sb->string[i];
@@ -415,6 +415,7 @@ void s_substring(Str s, Str_c sb, int pos, int tam)
   }
   int bytesAlocados = alocacao(bytesTotais);
   s->string = malloc(bytesAlocados);
+  assert(s->string != NULL);
   int k = 0;
   while (inicio < fim)
   {
